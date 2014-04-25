@@ -314,4 +314,35 @@ class GcParserTest extends FunSuite with StringGzResourceSupport {
                  |2014-04-20T16:07:45.276+0100: 4.428: [CMS-concurrent-sweep-start]""".stripMargin
     assert(parseAtom(atom).size === 5)
   }
+
+  test("read JDK 1.6.0_25 alternative CMS full GC atom") {
+    val atom = """Heap before GC invocations=14 (full 0):
+ par new generation   total 28311552K, used 15130224K [0x00002aaaae0e0000, 0x00002ab22e0e0000, 0x00002ab22e0e0000)
+  eden space 25165824K,  56% used [0x00002aaaae0e0000, 0x00002aae0d2ca6c0, 0x00002ab0ae0e0000)
+  from space 3145728K,  31% used [0x00002ab0ae0e0000, 0x00002ab0ea691c08, 0x00002ab16e0e0000)
+  to   space 3145728K,   0% used [0x00002ab16e0e0000, 0x00002ab16e0e0000, 0x00002ab22e0e0000)
+ concurrent mark-sweep generation total 31457280K, used 5908630K [0x00002ab22e0e0000, 0x00002ab9ae0e0000, 0x00002ab9ae0e0000)
+ concurrent-mark-sweep perm gen total 100352K, used 100182K [0x00002ab9ae0e0000, 0x00002ab9b42e0000, 0x00002ab9ce0e0000)
+2014-04-24T18:00:03.006+0100: 460.929: [Full GC (System) 460.929: [CMS: 5908630K->1262528K(31457280K), 5.5291920 secs] 21038855K->1262528K(59768832K), [CMS Perm : 100182K->99831K(100352K)], 5.5295240 secs] [Times: user=5.37 sys=0.15, real=5.53 secs]
+Heap after GC invocations=15 (full 1):
+ par new generation   total 28311552K, used 0K [0x00002aaaae0e0000, 0x00002ab22e0e0000, 0x00002ab22e0e0000)
+  eden space 25165824K,   0% used [0x00002aaaae0e0000, 0x00002aaaae0e0000, 0x00002ab0ae0e0000)
+  from space 3145728K,   0% used [0x00002ab0ae0e0000, 0x00002ab0ae0e0000, 0x00002ab16e0e0000)
+  to   space 3145728K,   0% used [0x00002ab16e0e0000, 0x00002ab16e0e0000, 0x00002ab22e0e0000)
+ concurrent mark-sweep generation total 31457280K, used 1262528K [0x00002ab22e0e0000, 0x00002ab9ae0e0000, 0x00002ab9ae0e0000)
+ concurrent-mark-sweep perm gen total 166388K, used 99831K [0x00002ab9ae0e0000, 0x00002ab9b835d000, 0x00002ab9ce0e0000)"""
+    val events = parseAtom(atom)
+
+    val start = Timestamp.parse("2014-04-24T18:00:03.006+0100")
+    val end = Timestamp.parse("2014-04-24T18:00:08.535+0100")
+    val interval = TimeInterval(start, end)
+    assert(events.count(_.isInstanceOf[GcCollection]) === 5)
+
+    events.foreach {
+      case GcCollection(14, `interval`, _, _, _, true) =>
+      case GcSnapshot(14, _, _, _) =>
+      case e => fail("unexpected " + e)
+    }
+  }
+
 }

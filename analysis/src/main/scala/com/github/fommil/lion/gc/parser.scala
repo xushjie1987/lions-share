@@ -290,7 +290,7 @@ trait GcParserCms {
   }
 
   def CmsCollectionSummary: Rule1[(Option[(Option[Int], Map[Int, Long])], Boolean, Duration)] = rule {
-    "[" ~ optional("Full" ~> identity) ~ " GC " ~ optional(IsoDate ~ ": ") ~ optional("(Allocation Failure) ") ~
+    "[" ~ optional("Full" ~> identity) ~ " GC " ~ optional("(System) ") ~ optional(IsoDate ~ ": ") ~ optional("(Allocation Failure) ") ~
       optional(Seconds ~ ": " ~ ParNewCollection) ~
       optional(Seconds ~ ": [CMS" ~ IsoDate ~ ": " ~ Seconds ~ ": [CMS" ~ oneOrMore("a" - "z" | anyOf(" -")) ~
         ": " ~ Seconds ~ "/" ~ Seconds ~ " secs]" ~ Times) ~
