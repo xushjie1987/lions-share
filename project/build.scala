@@ -1,6 +1,5 @@
 import sbt._
 import Keys._
-import org.sbtidea.SbtIdeaPlugin._
 import Package.ManifestAttributes
 import sbtassembly.Plugin._
 import AssemblyKeys._
@@ -12,7 +11,7 @@ object LionBuild extends FommilBuild with Dependencies {
 
   lazy val agent = Project(id = "agent", base = file("agent"), settings = defaultSettings ++ assemblySettings) settings (
     // all this for a pure java module...
-    autoScalaLibrary := false, ideaIncludeScalaFacet := false, crossPaths := false,
+    autoScalaLibrary := false, crossPaths := false,
     libraryDependencies ++= Seq(lombok, allocInstrument, guava),
     packageOptions := Seq(ManifestAttributes(
       "Premain-Class" -> "com.github.fommil.lion.agent.AllocationAgent",
@@ -98,7 +97,6 @@ trait FommilBuild extends Build {
       Resolver.sonatypeRepo("snapshots")
 //      "spray" at "http://repo.spray.io/"
     ),
-    ideaExcludeFolders := List(".idea", ".idea_modules"),
     scalaVersion := projectScala,
     licenses := Seq("LGPL" -> url("https://www.gnu.org/licenses/lgpl.html")),
     homepage := Some(url("http://github.com/fommil/lions-share")),
@@ -127,6 +125,6 @@ trait FommilBuild extends Build {
   )
 
   // would be nice not to have to define the 'root'
-  lazy val root = Project(id = "parent", base = file("."), settings = defaultSettings ++ Seq(ideaIgnoreModule := true)) aggregate (modules: _*) dependsOn (top)
+  lazy val root = Project(id = "parent", base = file("."), settings = defaultSettings) aggregate (modules: _*) dependsOn (top)
 
 }
