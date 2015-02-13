@@ -306,6 +306,18 @@ class GcParserTest extends FunSuite with StringGzResourceSupport {
     assert(events.size === 168)
   }
 
+  ignore("read JDK 1.8.0_31 logs with CMS") {
+    val gcLog = fromGzRes("gc-jdk8.0-cms.log.gz")
+    val events = parse(gcLog)
+    assert(events.size > 100)
+  }
+
+  ignore("read JDK 1.8.0_31 logs with default") {
+    val gcLog = fromGzRes("gc-jdk8.0-default.log.gz")
+    val events = parse(gcLog)
+    assert(events.size > 100)
+  }
+
   ignore("JDK 1.7.0_51 CMS marks") {
     val atom = """2014-04-20T16:07:45.006+0100: 4.158: [CMS-concurrent-preclean: 0.276/2.042 secs] [Times: user=7.40 sys=0.06, real=2.04 secs]
                  |2014-04-20T16:07:45.006+0100: 4.158: [CMS-concurrent-abortable-preclean-start]
