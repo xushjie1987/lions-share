@@ -4,6 +4,7 @@ import Package.ManifestAttributes
 import sbtassembly.Plugin._
 import AssemblyKeys._
 import com.typesafe.sbt.SbtScalariform._
+import scoverage.ScoverageSbtPlugin._
 
 object LionBuild extends FommilBuild with Dependencies {
 
@@ -77,6 +78,8 @@ trait FommilBuild extends Build {
   def module(dir: String) = Project(id = dir, base = file(dir), settings = defaultSettings)
 
   lazy val defaultSettings = Defaults.defaultSettings ++ scalariformSettings ++ Seq(
+    // fixed in scala 2.11
+    ScoverageKeys.coverageHighlighting := false,
     javacOptions in (Compile, compile) ++= Seq (
       "-source", "1.6", "-target", "1.6", "-Xlint:all", "-Werror",
       "-Xlint:-options", "-Xlint:-path", "-Xlint:-processing"
