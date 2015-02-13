@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/fommil/lions-share.svg?branch=master)](https://travis-ci.org/fommil/lions-share)
+[![Coverage Status](https://coveralls.io/repos/fommil/lions-share/badge.svg?branch=master)](https://coveralls.io/r/fommil/lions-share?branch=master)
+
+
 lions-share
 ===========
 
@@ -84,7 +88,6 @@ where
 
 Please check the issue tracker to see if we are already aware of an issue (including a workaround). The biggest issues are;
 
-* [Java 8 is not supported by the allocation agent](https://github.com/fommil/lions-share/issues/7) due to upstream bugs.
 * [Only specific JVMs are supported by the garbage collection log parser](https://github.com/fommil/lions-share/blob/master/analysis/src/main/scala/com/github/fommil/lion/gc/parser.scala#L24), and [G1 is not supported at all](https://github.com/fommil/lions-share/issues/13).
 
 You might need to run your application under a supported JVM, e.g.:

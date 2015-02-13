@@ -1,0 +1,20 @@
+language: scala
+jdk:
+  - openjdk6
+scala:
+  - 2.10.4
+sudo: false
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION compile test:compile doc && ./.check-diff.sh && sbt ++$TRAVIS_SCALA_VERSION test && sbt ++$TRAVIS_SCALA_VERSION clean coverage test
+after_success:
+  - sbt ++$TRAVIS_SCALA_VERSION coveralls
+  - sbt ++$TRAVIS_SCALA_VERSION clean $(if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then echo "publish"; fi)
+env:
+  global:
+    # travis encrypt -r fommil/lions-share SONATYPE_USERNAME=<USERNAME>
+    # travis encrypt -r fommil/lions-share SONATYPE_PASSWORD=<PASSWORD>
+  - secure: "gDgzmymkTWqhki+vw1qk2dChwflw7ctumwj8LO66DiGLq2I7x+VLwe4ZszA9gezPLZsV8pMVt4gBqoFXi+i2tlU8yQhQqKRUqfn6QWrk/SerNJsJ7RxnFM4WSQ/tr6Evgad1icCUkQi0nDr7OwvzjRJjPfY5IrAHNCmthe3OAlc="
+  - secure: "JTMpiwwfNhGEc0iIFVR+jJq1Hwzti2buW+B6fCYWt7tJboVQTGV5k+IFtHzNeyTGppRu6eOhZ3Z7EWZWz7JNqMAwsJ1wJc49W+BcjulGAcYSagqO78UBt32YAzqVKU0hQST/LEyrlL1HkNF2AWhjQDhLW8cF0eVJizOEf2UZddU="

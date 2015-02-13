@@ -11,6 +11,10 @@ object LionBuild extends FommilBuild with Dependencies {
 
   lazy val agent = Project(id = "agent", base = file("agent"), settings = defaultSettings ++ assemblySettings) settings (
     // all this for a pure java module...
+    javacOptions in (Compile, compile) ++= Seq (
+      "-source", "1.6", "-target", "1.6", "-Xlint:all", "-Werror"
+    ),
+    javacOptions in doc ++= Seq("-source", "1.6"),
     autoScalaLibrary := false, crossPaths := false,
     libraryDependencies ++= Seq(lombok, allocInstrument, guava),
     packageOptions := Seq(ManifestAttributes(
@@ -25,6 +29,16 @@ object LionBuild extends FommilBuild with Dependencies {
     }
   ) settings (
     addArtifact(artifact in (Compile, assembly), assembly).settings: _*
+  )
+
+  lazy val commonSettings = Seq(
+    scalacOptions in Compile ++= Seq(
+      "-encoding", "UTF-8", "-target:jvm-1.6", "-feature", "-deprecation",
+      "-Xfatal-warnings",
+      "-language:postfixOps", "-language:implicitConversions"
+    ),
+    maxErrors := 1,
+    fork := true
   )
 
   lazy val analysis = module("analysis") settings (
@@ -78,16 +92,18 @@ trait FommilBuild extends Build {
   )
   def module(dir: String) = Project(id = dir, base = file(dir), settings = defaultSettings)
 
-  import net.virtualvoid.sbt.graph.Plugin._
-  lazy val defaultSettings = Defaults.defaultSettings ++ graphSettings ++ Seq(
-    scalacOptions in Compile ++= Seq(
-      "-encoding", "UTF-8", "-target:jvm-1.6", "-Xfatal-warnings",
-      "-language:postfixOps", "-language:implicitConversions"),
+  lazy val defaultSettings = Defaults.defaultSettings ++ Seq(
+    //scalariformSettings,
     javacOptions in (Compile, compile) ++= Seq (
       "-source", "1.6", "-target", "1.6", "-Xlint:all", "-Werror",
       "-Xlint:-options", "-Xlint:-path", "-Xlint:-processing"
     ),
-    javacOptions in (doc) ++= Seq("-source", "1.6"),
+    javacOptions in doc ++= Seq("-source", "1.6"),
+    scalacOptions in Compile ++= Seq(
+      "-encoding", "UTF-8", "-target:jvm-1.6", "-feature", "-deprecation",
+      "-Xfatal-warnings",
+      "-language:postfixOps", "-language:implicitConversions"
+    ),
     compileOrder := CompileOrder.JavaThenScala,
     outputStrategy := Some(StdoutOutput),
     fork := true,
