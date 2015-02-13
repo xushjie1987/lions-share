@@ -2,7 +2,7 @@ package com.github.fommil.utils
 
 import scala.io.Source
 import java.util.zip.GZIPInputStream
-import java.io.{FileWriter, FileOutputStream, File}
+import java.io.{ FileWriter, FileOutputStream, File }
 
 trait StringGzResourceSupport {
   protected def fromGzRes[T](res: String) = {

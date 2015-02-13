@@ -42,7 +42,6 @@ trait AllocationMarshalling {
 
 object AllocationMarshalling extends AllocationMarshalling
 
-
 trait AllocationAnalyserMarshalling {
   import DefaultJsonProtocol._
   implicit val NodeFormat: JsonFormat[Node] = lazyFormat(jsonFormat4(Node))

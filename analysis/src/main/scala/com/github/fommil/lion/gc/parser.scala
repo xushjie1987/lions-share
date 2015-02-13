@@ -3,10 +3,10 @@ package com.github.fommil.lion.gc
 import org.parboiled.scala.parserunners.ReportingParseRunner
 import org.parboiled.errors.ErrorUtils
 import scala.concurrent.duration._
-import scala.util.{Success, Failure, Try}
+import scala.util.{ Success, Failure, Try }
 import akka.event.slf4j.SLF4JLogging
 import org.parboiled.scala._
-import com.github.fommil.utils.{TimeInterval, Timestamp, WhitespaceAwareParser}
+import com.github.fommil.utils.{ TimeInterval, Timestamp, WhitespaceAwareParser }
 
 object GcParser {
   def parse(source: String) = parser.parseGcLog(source).sorted
@@ -15,25 +15,26 @@ object GcParser {
   protected[gc] def parseAtom(atom: String) = parser.parseGcAtom(atom)
 }
 
-/** Parses JDK GC log files that have been produced using flags:
-  *
-  * `-Xloggc:gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution -XX:+PrintHeapAtGC`
-  *
-  * The following JDKs are supported:
-  *
-  * 1. 1.6.0_25
-  * 2. 1.7.0_51
-  * 3. 1.8.0_0
-  *
-  * The following garbage collectors are supported:
-  *
-  * 1. default GC (i.e. `-XX:+UseParallelGC`)
-  * 2. default GC with parallel old gen, < 1.7.0: `-XX:+UseParallelOldGC`
-  * 3. concurrent mark sweep: `-XX:+UseConcMarkSweepGC`
-  * 4. concurrent mark sweep (incremental), < 1.8.0: `-XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode`
-  *
-  * @see https://blogs.oracle.com/poonam/entry/understanding_cms_gc_logs
-  */
+/**
+ * Parses JDK GC log files that have been produced using flags:
+ *
+ * `-Xloggc:gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution -XX:+PrintHeapAtGC`
+ *
+ * The following JDKs are supported:
+ *
+ * 1. 1.6.0_25
+ * 2. 1.7.0_51
+ * 3. 1.8.0_0
+ *
+ * The following garbage collectors are supported:
+ *
+ * 1. default GC (i.e. `-XX:+UseParallelGC`)
+ * 2. default GC with parallel old gen, < 1.7.0: `-XX:+UseParallelOldGC`
+ * 3. concurrent mark sweep: `-XX:+UseConcMarkSweepGC`
+ * 4. concurrent mark sweep (incremental), < 1.8.0: `-XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode`
+ *
+ * @see https://blogs.oracle.com/poonam/entry/understanding_cms_gc_logs
+ */
 private class GcParser extends GcParserCommon with GcParserDefault with GcParserCms with SLF4JLogging {
 
   // this could be done streaming, but meh...
@@ -66,20 +67,18 @@ private class GcParser extends GcParserCommon with GcParserDefault with GcParser
 
 trait GcParserCommon extends WhitespaceAwareParser {
 
-
   // abstract rules
   def nTimesMap[K, V](n: Int, rule: Rule1[Map[K, V]]): Rule1[Map[K, V]] = nTimes(n, rule) ~~> { _.reduce(_ ++ _) }
 
   def oneOrMoreSets[T](rule: Rule1[Set[T]]): Rule1[Set[T]] = oneOrMore(rule) ~~> { _.flatten.toSet }
 
-
   // common GC rules
 
   def Header: Rule1[GcEvents] = rule {
     "Java HotSpot(TM) " ~ oneOrMore(noneOf("\n")) ~ "\n" ~
-    "Memory: " ~ oneOrMore(noneOf("\n")) ~ "\n" ~
-    "CommandLine flags: " ~ oneOrMore(noneOf("\n"))
-  } ~> {s => Nil}
+      "Memory: " ~ oneOrMore(noneOf("\n")) ~ "\n" ~
+      "CommandLine flags: " ~ oneOrMore(noneOf("\n"))
+  } ~> { s => Nil }
 
   def SurvivorSummary: Rule1[Int] = rule {
     "Desired survivor size " ~ Digits ~ " bytes, new threshold " ~ SavedDigits ~ " (max " ~ Digits ~ ")\n"
@@ -231,8 +230,8 @@ trait GcParserCms {
     optional(AbortedMark ~> identity) ~ IsoDate ~ ": " ~ SavedSeconds ~ ": [" ~
       optional("GC" ~ optional("[YG occupancy: " ~ Size ~ " (" ~ Size ~ ")]" ~ Seconds ~ ": [Rescan (parallel) , " ~ Seconds ~
         " secs]" ~ Seconds ~ ": [weak refs processing, " ~ Seconds ~ " secs] " ~ optional(Seconds ~
-        ": [class unloading, " ~ Seconds ~ " secs]" ~ Seconds ~ ": [scrub symbol & string tables, " ~
-        Seconds ~ " secs]")) ~ optional(" (" ~ oneOrMore(noneOf("\n)")) ~ ")") ~ " [1") ~
+          ": [class unloading, " ~ Seconds ~ " secs]" ~ Seconds ~ ": [scrub symbol & string tables, " ~
+          Seconds ~ " secs]")) ~ optional(" (" ~ oneOrMore(noneOf("\n)")) ~ ")") ~ " [1") ~
       " CMS-" ~ " " ~ oneOrMore(noneOf(" ]:")) ~> identity ~
       zeroOrMore(noneOf("\n")) ~ optional("\n")
   } ~~> { (aborted, date, seconds, name) =>

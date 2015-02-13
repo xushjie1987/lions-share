@@ -1,4 +1,4 @@
-import com.github.fommil.lion.alloc.{AllocationSizes, AllocationReporter, AllocationAnalyser, AllocationParser}
+import com.github.fommil.lion.alloc.{ AllocationSizes, AllocationReporter, AllocationAnalyser, AllocationParser }
 import java.io.FileNotFoundException
 import sbt._
 import sbt.ForkOptions
@@ -6,8 +6,8 @@ import sbt.Keys._
 import sbt.Attributed.data
 
 import com.github.fommil
-import fommil.lion.gc.{GcReporter, GcParser}
-import fommil.utils.{StringResourceSupport, StringFileSupport, StringGzResourceSupport}
+import fommil.lion.gc.{ GcReporter, GcParser }
+import fommil.utils.{ StringResourceSupport, StringFileSupport, StringGzResourceSupport }
 import fommil.utils.Pimps._
 
 object LionPlugin extends Plugin with StringGzResourceSupport with StringResourceSupport with StringFileSupport {
@@ -22,7 +22,7 @@ object LionPlugin extends Plugin with StringGzResourceSupport with StringResourc
   val lionAllocTrace = SettingKey[Map[String, Long]]("classes and byte sample threshold")
 
   // https://github.com/sbt/sbt/issues/1260
-  private val agent = "com.github.fommil.lion" % "agent" % "1.0-SNAPSHOT" classifier("assembly") intransitive()
+  private val agent = "com.github.fommil.lion" % "agent" % "1.0-SNAPSHOT" classifier ("assembly") intransitive ()
 
   override val projectSettings = Seq(
     libraryDependencies += agent,
@@ -66,28 +66,28 @@ object LionPlugin extends Plugin with StringGzResourceSupport with StringResourc
   )
 
   def agentJar(update: UpdateReport): File = {
-   for {
-     report <- update.configuration("runtime-internal").get.modules
-     module = report.module
-     if module.organization == agent.organization
-     if module.name == agent.name
-     if module.revision == agent.revision
-     artifacts <- report.artifacts
-     file = artifacts._2
-   } yield file
- }.head
+    for {
+      report <- update.configuration("runtime-internal").get.modules
+      module = report.module
+      if module.organization == agent.organization
+      if module.name == agent.name
+      if module.revision == agent.revision
+      artifacts <- report.artifacts
+      file = artifacts._2
+    } yield file
+  }.head
 
   def runLion(cp: Classpath,
-              main: Option[String],
-              streams: TaskStreams,
-              update: UpdateReport,
-              runs: Int,
-              allocRuns: Int,
-              allocTrim: Option[Int],
-              sampleSeconds: Int,
-              trace: Map[String, Long],
-              out: File,
-              vmArgs: Seq[String]): Unit = {
+    main: Option[String],
+    streams: TaskStreams,
+    update: UpdateReport,
+    runs: Int,
+    allocRuns: Int,
+    allocTrim: Option[Int],
+    sampleSeconds: Int,
+    trace: Map[String, Long],
+    out: File,
+    vmArgs: Seq[String]): Unit = {
     val log = streams.log
     if (main.isEmpty) {
       log.warn("lionClass (or mainClass) must be set")
@@ -112,20 +112,20 @@ object LionPlugin extends Plugin with StringGzResourceSupport with StringResourc
           "-XX:+PrintTenuringDistribution", "-XX:+PrintHeapAtGC"
         )
       }
-    }.map {gcLog =>
+    }.map { gcLog =>
       GcParser.parse(fromFile(gcLog))
     }.withEffect { processes =>
       if (processes.nonEmpty) {
         GcReporter.gcReport(processes, new File(out, "gc.js"))
         val report = new File(out, "gc.html")
         toFile(report, fromRes("/com/github/fommil/lion/gc/report.html"))
-        log.info(s"lions-share garbage collection report is available at ${report.getAbsolutePath }")
+        log.info(s"lions-share garbage collection report is available at ${report.getAbsolutePath}")
       }
     }
 
     // Instrumented runs with Allocation Agent
     val jar = agentJar(update)
-    val traces = (for((c,s) <- trace) yield s"$c:$s").mkString(",")
+    val traces = (for ((c, s) <- trace) yield s"$c:$s").mkString(",")
     (1 to allocRuns).map { run =>
       new File(out, s"alloc-$run.log") withEffect { allocLog =>
         fork(s"-javaagent:$jar=$allocLog $sampleSeconds $traces")
@@ -140,10 +140,10 @@ object LionPlugin extends Plugin with StringGzResourceSupport with StringResourc
         AllocationReporter.allocReport(processes, new File(out, "alloc.js"))
         val report = new File(out, "alloc.html")
         toFile(report, fromRes("/com/github/fommil/lion/alloc/report.html"))
-        log.info(s"lions-share allocation report is available at ${report.getAbsolutePath }")
+        log.info(s"lions-share allocation report is available at ${report.getAbsolutePath}")
       }
     }
-    
+
     val report = new File(out, "index.html")
     toFile(report, fromRes("/lion-report.html"))
     log.info(s"lions-share summary report is available at ${report.getAbsolutePath}")

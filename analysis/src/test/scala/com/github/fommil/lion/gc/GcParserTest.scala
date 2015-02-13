@@ -1,9 +1,9 @@
 package com.github.fommil.lion.gc
 
 import org.scalatest.FunSuite
-import GcParser.{parse, parseAtom}
+import GcParser.{ parse, parseAtom }
 import MemoryRegion._
-import com.github.fommil.utils.{TimeInterval, Timestamp, StringGzResourceSupport}
+import com.github.fommil.utils.{ TimeInterval, Timestamp, StringGzResourceSupport }
 
 class GcParserTest extends FunSuite with StringGzResourceSupport {
 

@@ -5,9 +5,9 @@ import LabelCell.NullCell
 import com.github.fommil.utils.Timestamp
 
 case class Header(label: Option[String],
-                  `type`: String,
-                  id: Option[String],
-                  role: Option[String])
+  `type`: String,
+  id: Option[String],
+  role: Option[String])
 
 object DataHeader {
   def apply(label: String, `type`: String = "number", id: Option[String] = None) =
@@ -15,7 +15,7 @@ object DataHeader {
 }
 
 object RoleHeader {
-  def apply(role: String, `type`: String = "string", id: Option[String] = None, label:  Option[String] = None) =
+  def apply(role: String, `type`: String = "string", id: Option[String] = None, label: Option[String] = None) =
     Header(label, `type`, id, Some(role))
 }
 

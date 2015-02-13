@@ -1,6 +1,6 @@
 package com.github.fommil.utils
 
-import scala.collection.{SortedMap, breakOut}
+import scala.collection.{ SortedMap, breakOut }
 import java.util.concurrent.Callable
 
 object Pimps {

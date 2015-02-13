@@ -1,7 +1,7 @@
 package com.github.fommil.utils
 
-import scala.concurrent.duration.{FiniteDuration, Duration, DurationLong}
-import java.text.{SimpleDateFormat, DateFormat}
+import scala.concurrent.duration.{ FiniteDuration, Duration, DurationLong }
+import java.text.{ SimpleDateFormat, DateFormat }
 import spray.json.DefaultJsonProtocol
 
 /*
@@ -11,7 +11,6 @@ import spray.json.DefaultJsonProtocol
  * I would have used Joda, but DateTime doesn't implement `equals`, making
  * it inappropriate for use in pattern matching.
  */
-
 
 case class Timestamp(instant: Long) extends Ordered[Timestamp] {
   def +(d: Duration) = Timestamp(instant + d.toMillis)
@@ -54,7 +53,7 @@ trait OrderedByInterval[T <: HasInterval] extends HasInterval with Ordered[T] {
 
 // the last entry may be smaller than the rest
 class TimeIntervalRange private (start: Timestamp, end: Timestamp, s: Long,
-                                 override val length: Int) extends IndexedSeq[TimeInterval] {
+    override val length: Int) extends IndexedSeq[TimeInterval] {
   override def apply(idx: Int): TimeInterval = {
     require(idx >= 0 && idx < length)
     val from = Timestamp(start.instant + idx * s)
@@ -76,7 +75,6 @@ object TimeIntervalRange {
     new TimeIntervalRange(start, end, s, length.toInt)
   }
 }
-
 
 trait TimeMarshalling {
   import DefaultJsonProtocol._

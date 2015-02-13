@@ -1,6 +1,6 @@
 package com.github.fommil.lion.gc
 
-import com.github.fommil.utils.{OrderedByInterval, TimeInterval}
+import com.github.fommil.utils.{ OrderedByInterval, TimeInterval }
 
 trait GcEvent extends OrderedByInterval[GcEvent] {
   def groupId: Long
@@ -50,25 +50,25 @@ object MemoryRegions {
 }
 
 case class GcCollection(groupId: Long,
-                        interval: TimeInterval,
-                        region: MemoryRegion,
-                        before: MemoryUsage,
-                        after: MemoryUsage,
-                        full: Boolean) extends GcEvent
+  interval: TimeInterval,
+  region: MemoryRegion,
+  before: MemoryUsage,
+  after: MemoryUsage,
+  full: Boolean) extends GcEvent
 
 // groupId must be negative if this is user-generated (i.e. not parsed from a gc log)
 case class GcSnapshot(groupId: Long,
-                      interval: TimeInterval,
-                      region: MemoryRegion,
-                      current: MemoryUsage) extends GcEvent
+  interval: TimeInterval,
+  region: MemoryRegion,
+  current: MemoryUsage) extends GcEvent
 
 case class GcMark(interval: TimeInterval,
-                  phase: String,
-                  aborted: Boolean) extends GcEvent {
+    phase: String,
+    aborted: Boolean) extends GcEvent {
   def groupId = Long.MaxValue
 }
 
 case class GcSurvivors(groupId: Long,
-                       interval: TimeInterval,
-                       threshold: Int,
-                       distribution: Map[Int, Long] = Map.empty) extends GcEvent
+  interval: TimeInterval,
+  threshold: Int,
+  distribution: Map[Int, Long] = Map.empty) extends GcEvent

@@ -1,7 +1,7 @@
 package com.github.fommil.lion.alloc
 
 import com.github.fommil.utils.JsSupport
-import java.io.{FileWriter, File}
+import java.io.{ FileWriter, File }
 import spray.json.DefaultJsonProtocol
 import DefaultJsonProtocol._
 import com.github.fommil.google.DataTableMarshalling._

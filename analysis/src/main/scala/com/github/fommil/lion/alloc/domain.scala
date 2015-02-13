@@ -1,23 +1,23 @@
 package com.github.fommil.lion.alloc
 
-import com.github.fommil.utils.{OrderedByInterval, TimeInterval, Pimps}
+import com.github.fommil.utils.{ OrderedByInterval, TimeInterval, Pimps }
 import scala.collection.immutable.ListMap
 import com.google.common.cache.CacheBuilder
 import Pimps.closureToCallable
-import StackFrame.{interned, clean}
+import StackFrame.{ interned, clean }
 
 sealed trait AllocationSnapshot extends OrderedByInterval[AllocationSnapshot]
 
 case class AllocationSizes(interval: TimeInterval,
-                           sizes: Map[Clazz, Long]) extends AllocationSnapshot {
+    sizes: Map[Clazz, Long]) extends AllocationSnapshot {
   def trim(keep: Int) = copy(sizes = sizes.toList.sortBy(-_._2).take(keep).toMap)
 }
 
 case class AllocationTraces(interval: TimeInterval,
-                            traces: Map[Clazz, List[StackTrace]]) extends AllocationSnapshot
+  traces: Map[Clazz, List[StackTrace]]) extends AllocationSnapshot
 
 case class AllocationLengths(interval: TimeInterval,
-                             lengths: Map[Clazz, List[AllocationLength]]) extends AllocationSnapshot
+  lengths: Map[Clazz, List[AllocationLength]]) extends AllocationSnapshot
 
 case class AllocationLength(length: Int, count: Long)
 

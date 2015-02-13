@@ -21,8 +21,7 @@ class AllocationAnalyser extends SLF4JLogging {
   def combinedAllocationLengths(all: Seq[AllocationSnapshots]) =
     allocationLengths(all.reduce(_ ++ _))
 
-  def combinedAllocationTraces(all: Seq[AllocationSnapshots])
-                              (filter: String => Boolean) =
+  def combinedAllocationTraces(all: Seq[AllocationSnapshots])(filter: String => Boolean) =
     allocationTraces(all.reduce(_ ++ _))(filter)
 
   def allocationSizes(all: AllocationSnapshots): DataTable = {
@@ -49,8 +48,7 @@ class AllocationAnalyser extends SLF4JLogging {
     DataTable(header, body)
   }
 
-  def allocationTraces(all: AllocationSnapshots)
-                      (filter: String => Boolean): Map[Clazz, Map[String, List[Node]]] = {
+  def allocationTraces(all: AllocationSnapshots)(filter: String => Boolean): Map[Clazz, Map[String, List[Node]]] = {
     val allocs = all.collect { case a: AllocationTraces => a }
     val start = all.min.interval.from
 
@@ -68,15 +66,16 @@ class AllocationAnalyser extends SLF4JLogging {
     } yield (clazz, time, node)
 
     def squash(nodes: List[Node]): List[Node] = if (nodes.isEmpty) Nil
-    else (List.empty[Node] /: nodes) { case (r, n) =>
-      r.find(_.name == n.name) match {
-        case None => n :: r
-        case Some(found) =>
-          def merge(a: Node, b: Node): Node = a.copy(
-            children = squash(a.children ++ b.children),
-            size = a.size + b.size)
-          merge(n, found) :: r.filterNot(_ == found)
-      }
+    else (List.empty[Node] /: nodes) {
+      case (r, n) =>
+        r.find(_.name == n.name) match {
+          case None => n :: r
+          case Some(found) =>
+            def merge(a: Node, b: Node): Node = a.copy(
+              children = squash(a.children ++ b.children),
+              size = a.size + b.size)
+            merge(n, found) :: r.filterNot(_ == found)
+        }
     }
 
     def clean(nodes: List[Node]): List[Node] = {
@@ -135,6 +134,5 @@ class AllocationAnalyser extends SLF4JLogging {
   }
 
 }
-
 
 case class Node(children: List[Node], name: String, size: Int, id: Int = Random.nextInt())

@@ -1,6 +1,6 @@
 package com.github.fommil.lion.gc
 
-import com.github.fommil.utils.{TimeInterval, TimeIntervalRange, Timestamp}
+import com.github.fommil.utils.{ TimeInterval, TimeIntervalRange, Timestamp }
 import com.github.fommil.google._
 import com.github.fommil.utils.Pimps._
 
@@ -13,28 +13,30 @@ import java.util.concurrent.TimeUnit
 import org.apache.commons.math3.stat.descriptive.rank.Percentile
 import FiniteDuration.FiniteDurationIsOrdered
 
-/** Produces data for consumption by Google Charts from garbage collection logs.
-  * Methods taking a single `List[GcEvent]` are for analysing a single process.
-  * Methods taking multiple `List[GcEvent]`s are for statistical analysis over
-  * repeated runs of the same process.
-  *
-  * NOTE: JavaScript must be used on the client side to convert the
-  * millisecond dates into `Date` format (this is not possible via JSON).
-  */
+/**
+ * Produces data for consumption by Google Charts from garbage collection logs.
+ * Methods taking a single `List[GcEvent]` are for analysing a single process.
+ * Methods taking multiple `List[GcEvent]`s are for statistical analysis over
+ * repeated runs of the same process.
+ *
+ * NOTE: JavaScript must be used on the client side to convert the
+ * millisecond dates into `Date` format (this is not possible via JSON).
+ */
 class GcAnalyser {
   private case class HeapInstant(timestamp: Timestamp, used: Long, collected: Long) extends Ordered[HeapInstant] {
     override def compare(that: HeapInstant): Int = timestamp compare that.timestamp
   }
 
-  /** A time-series of allocation rates averaged over several processes.
-    * Table takes the form:
-    * ```
-    * DateTime     | Average     | Min | -VE | +VE | Max
-    * ---------------------------------------------------
-    * (UNIX time)  | (Bytes/sec) | ... | ... | ... | ....
-    * ```
-    * This format is appropriate for use in a Google Chart Intervals.
-    */
+  /**
+   * A time-series of allocation rates averaged over several processes.
+   * Table takes the form:
+   * ```
+   * DateTime     | Average     | Min | -VE | +VE | Max
+   * ---------------------------------------------------
+   * (UNIX time)  | (Bytes/sec) | ... | ... | ... | ....
+   * ```
+   * This format is appropriate for use in a Google Chart Intervals.
+   */
   def averageAllocations(processes: Seq[GcEvents]) = {
     timeseriesQuantiles(baseline(processes map allocationsRaw))
   }
@@ -43,9 +45,9 @@ class GcAnalyser {
   // returning the intervals and the frequencies of the data (if normalised) or
   // the averages
   private def timeseriesBins(allocations: Seq[(Duration, Double)],
-                               step: FiniteDuration,
-                               start: Timestamp = Timestamp(0),
-                               normalise: Boolean = true) = {
+    step: FiniteDuration,
+    start: Timestamp = Timestamp(0),
+    normalise: Boolean = true) = {
     require(allocations.nonEmpty)
 
     val n = step.toUnit(TimeUnit.SECONDS)
@@ -62,7 +64,7 @@ class GcAnalyser {
           val shiftedEnd = start + interval.to
           val shifted = TimeInterval(shiftedStart, shiftedEnd)
           val value = if (normalise) found.sum / n else found.sum / found.size
-          Some((shifted, value ))
+          Some((shifted, value))
       }
     }
   }
@@ -71,10 +73,10 @@ class GcAnalyser {
   // and produces Google Chart data for inclusion in an Intervals chart using the given
   // function for computing the intervals)
   private def timeseriesQuantiles(data: Seq[Seq[(Duration, Double)]],
-                                    label: String = "Median",
-                                    iLabels: List[String] = List.fill(4)("i0"),
-                                    percentiles: List[Double] = List(Double.MinPositiveValue, 20, 80, 100),
-                                    normalise: Boolean = true) = {
+    label: String = "Median",
+    iLabels: List[String] = List.fill(4)("i0"),
+    percentiles: List[Double] = List(Double.MinPositiveValue, 20, 80, 100),
+    normalise: Boolean = true) = {
     val headers = DataHeader("Seconds") :: DataHeader(label) ::
       iLabels.map(i => RoleHeader("interval", `type` = "number", id = Some(i)))
 
@@ -119,7 +121,7 @@ class GcAnalyser {
     def blacklisted(test: TimeInterval) = gcBlocks.exists { _.overlaps(test) }
     // obtained by JMX and user managed, rather than parsed
     val userInstants = events.filter(_.groupId < 0).groupBy(_.groupId).values.flatMap { group =>
-    // timestamps of the JMX polls may differ across regions
+      // timestamps of the JMX polls may differ across regions
       val start = group.minBy(_.interval).interval.from
       val end = group.maxBy(_.interval).interval.to
       if (blacklisted(TimeInterval(start, end))) None
@@ -132,21 +134,23 @@ class GcAnalyser {
 
     val instants = (loggedInstants ++ userInstants).toSeq.sorted
 
-    instants.sliding(2).map { case Seq(last, now) =>
-      (now.timestamp, (now.used + now.collected - last.used).toDouble / 1024 / 1024 / 1024)
+    instants.sliding(2).map {
+      case Seq(last, now) =>
+        (now.timestamp, (now.used + now.collected - last.used).toDouble / 1024 / 1024 / 1024)
     }.toList
   }
 
-  /** A time-series of garbage collection pause times by concurrent
-    * and "stop the world" category. Table takes the form:
-    * ```
-    * DateTime     | Average     | Min | -VE | +VE | Max | Full Min | Full Max
-    * ------------------------------------------------------------------------
-    * (UNIX time)  | (Bytes/sec) | ... | ... | ... | ... | ...      | ...
-    * ...
-    * ```
-    * This format is appropriate for use in a Google Chart Interval.
-    */
+  /**
+   * A time-series of garbage collection pause times by concurrent
+   * and "stop the world" category. Table takes the form:
+   * ```
+   * DateTime     | Average     | Min | -VE | +VE | Max | Full Min | Full Max
+   * ------------------------------------------------------------------------
+   * (UNIX time)  | (Bytes/sec) | ... | ... | ... | ... | ...      | ...
+   * ...
+   * ```
+   * This format is appropriate for use in a Google Chart Interval.
+   */
   def averagePauses(processes: Seq[GcEvents]): DataTable = {
     def duration(from: Timestamp, to: Timestamp) = (to.instant - from.instant) / 1000.0
 
@@ -172,32 +176,35 @@ class GcAnalyser {
   }
 
   def throughput(processes: Seq[GcEvents]): DataTable =
-    throughput(processes.zipWithIndex.map{case (k,v) => (v.toString, k)}.toMap)
+    throughput(processes.zipWithIndex.map { case (k, v) => (v.toString, k) }.toMap)
 
-  /** Histogram data of throughput (percentage time not in GC)
-    * ```
-    * ID        | Throughput (%)
-    * ------------------------------------------------------------------------------------------
-    * (string)  | [0, 100]
-    * ...
-    * ```
-    * This format is appropriate for use in a Google Chart Combo, using Stacked Areas
-    * for the memory regions and lines for the before/after limits.
-    *
-    */
+  /**
+   * Histogram data of throughput (percentage time not in GC)
+   * ```
+   * ID        | Throughput (%)
+   * ------------------------------------------------------------------------------------------
+   * (string)  | [0, 100]
+   * ...
+   * ```
+   * This format is appropriate for use in a Google Chart Combo, using Stacked Areas
+   * for the memory regions and lines for the before/after limits.
+   *
+   */
   def throughput(processes: Map[String, GcEvents]): DataTable = {
     def uptime(events: GcEvents) = if (events.isEmpty) 0.0 else (events.max.interval.to.instant - events.min.interval.from.instant) / 1000.0
-    def collecting(events: GcEvents) = events.collect { case c: GcCollection =>
-      (c.groupId, c.interval.duration)
+    def collecting(events: GcEvents) = events.collect {
+      case c: GcCollection =>
+        (c.groupId, c.interval.duration)
     }.toMap.values.reduceOption[Duration](_ + _).getOrElse(Duration.Zero).toUnit(TimeUnit.SECONDS)
 
     val headers = DataHeader("Throughput") :: Nil
-    val body = processes.flatMap { case (id, events) =>
-      if (events.isEmpty) None else {
-        val up = uptime(events)
-        val gc = collecting(events)
-        Some(Row(DataCell(100 * (up - gc) / up, Some(id)) :: Nil))
-      }
+    val body = processes.flatMap {
+      case (id, events) =>
+        if (events.isEmpty) None else {
+          val up = uptime(events)
+          val gc = collecting(events)
+          Some(Row(DataCell(100 * (up - gc) / up, Some(id)) :: Nil))
+        }
     }.toList
     DataTable(headers, body)
   }
@@ -205,15 +212,16 @@ class GcAnalyser {
   // do a specialist one
   def profile(events: GcEvents) = averageProfile(Seq(events))
 
-  /** A stacked interval time-series of heap usage before and after GC (with quantiles).
-    * Table takes the form (O = Old Gen, N = New Gen + Old Gen):
-    * ```
-    * DateTime    | OAfter | OMin | O-VE | O+VE | OMax | (repeat: NBefore, NAfter)
-    * -----------------------------------------------------------------------------------------
-    * (UNIX time) | (Bytes) ...
-    * ```
-    * This format is appropriate for use in a Google Chart Interval.
-    */
+  /**
+   * A stacked interval time-series of heap usage before and after GC (with quantiles).
+   * Table takes the form (O = Old Gen, N = New Gen + Old Gen):
+   * ```
+   * DateTime    | OAfter | OMin | O-VE | O+VE | OMax | (repeat: NBefore, NAfter)
+   * -----------------------------------------------------------------------------------------
+   * (UNIX time) | (Bytes) ...
+   * ```
+   * This format is appropriate for use in a Google Chart Interval.
+   */
   def averageProfile(processes: Seq[GcEvents]): DataTable = {
     val gb = 1024.0 * 1024 * 1024
 
@@ -223,7 +231,7 @@ class GcAnalyser {
       val to = collections.head.interval.to
 
       import MemoryRegion.Tenured
-      val oAfter = collections.collect  {
+      val oAfter = collections.collect {
         case GcSnapshot(_, TimeInterval(time, _), Tenured, snap) if time != from => snap.usedBytes
         case GcCollection(_, _, Tenured, _, after, _) => after.usedBytes
       }.sum
@@ -250,9 +258,9 @@ class GcAnalyser {
     val oa = timeseriesQuantiles(oAfter, label = "OldGen",
       iLabels = List("oa2", "oa1", "oa1", "oa2"), percentiles = tight, normalise = false)
     val nb = timeseriesQuantiles(nBefore, label = "NewGen Before GC",
-      iLabels = List("nb2","nb1","nb1","nb2"), percentiles = tight, normalise = false)
+      iLabels = List("nb2", "nb1", "nb1", "nb2"), percentiles = tight, normalise = false)
     val na = timeseriesQuantiles(nAfter, label = "NewGen After GC",
-      iLabels = List("na2","na1","na1","na2"), percentiles = tight, normalise = false)
+      iLabels = List("na2", "na1", "na1", "na2"), percentiles = tight, normalise = false)
 
     oa.join(nb.join(na, strict = false), strict = false)
   }

@@ -1,6 +1,6 @@
 package com.github.fommil.lion.gc
 
-import java.io.{FileWriter, File}
+import java.io.{ FileWriter, File }
 import com.github.fommil.utils.JsSupport
 import com.github.fommil.google.DataTableMarshalling._
 

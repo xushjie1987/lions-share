@@ -1,6 +1,6 @@
 package com.github.fommil.utils
 
-import spray.json.{JsonWriter, JsValue}
+import spray.json.{ JsonWriter, JsValue }
 import java.io.Writer
 
 trait JsSupport {

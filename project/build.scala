@@ -3,6 +3,7 @@ import Keys._
 import Package.ManifestAttributes
 import sbtassembly.Plugin._
 import AssemblyKeys._
+import com.typesafe.sbt.SbtScalariform._
 
 object LionBuild extends FommilBuild with Dependencies {
 
@@ -11,10 +12,6 @@ object LionBuild extends FommilBuild with Dependencies {
 
   lazy val agent = Project(id = "agent", base = file("agent"), settings = defaultSettings ++ assemblySettings) settings (
     // all this for a pure java module...
-    javacOptions in (Compile, compile) ++= Seq (
-      "-source", "1.6", "-target", "1.6", "-Xlint:all", "-Werror"
-    ),
-    javacOptions in doc ++= Seq("-source", "1.6"),
     autoScalaLibrary := false, crossPaths := false,
     libraryDependencies ++= Seq(lombok, allocInstrument, guava),
     packageOptions := Seq(ManifestAttributes(
@@ -29,16 +26,6 @@ object LionBuild extends FommilBuild with Dependencies {
     }
   ) settings (
     addArtifact(artifact in (Compile, assembly), assembly).settings: _*
-  )
-
-  lazy val commonSettings = Seq(
-    scalacOptions in Compile ++= Seq(
-      "-encoding", "UTF-8", "-target:jvm-1.6", "-feature", "-deprecation",
-      "-Xfatal-warnings",
-      "-language:postfixOps", "-language:implicitConversions"
-    ),
-    maxErrors := 1,
-    fork := true
   )
 
   lazy val analysis = module("analysis") settings (
@@ -59,15 +46,12 @@ trait Dependencies {
   )
 
   val lombok = "org.projectlombok" % "lombok" % "1.16.2" % "provided"
-//  val allocInstrument = "com.google.code.java-allocation-instrumenter" % "java-allocation-instrumenter" % "2.1"
   val allocInstrument = "com.github.fommil" % "java-allocation-instrumenter" % "2.2-SNAPSHOT"
   val guava = "com.google.guava" % "guava" % "18.0"
   // guava doesn't declare jsr305
   val jsr305 = "com.google.code.findbugs" % "jsr305" % "2.0.3"
 
   val scalatest = "org.scalatest" %% "scalatest" % "2.2.4" % "test"
-// needed when we got to scala 2.11
-//  val scalaxml = "org.scala-lang.modules" %% "scala-xml" % "1.0.1"
 
   val sprayjson = "io.spray" %% "spray-json" % "1.3.1"
   val parboiled = "org.parboiled" %% "parboiled-scala" % "1.1.7"
@@ -92,8 +76,7 @@ trait FommilBuild extends Build {
   )
   def module(dir: String) = Project(id = dir, base = file(dir), settings = defaultSettings)
 
-  lazy val defaultSettings = Defaults.defaultSettings ++ Seq(
-    //scalariformSettings,
+  lazy val defaultSettings = Defaults.defaultSettings ++ scalariformSettings ++ Seq(
     javacOptions in (Compile, compile) ++= Seq (
       "-source", "1.6", "-target", "1.6", "-Xlint:all", "-Werror",
       "-Xlint:-options", "-Xlint:-path", "-Xlint:-processing"
