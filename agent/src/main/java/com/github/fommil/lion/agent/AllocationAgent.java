@@ -29,9 +29,6 @@ public class AllocationAgent {
     public static void premain(String agentArgs, Instrumentation inst) {
         String[] args = agentArgs.split(" ");
 
-        if (System.getProperty("java.version").contains("1.8"))
-            throw new UnsupportedOperationException("Java 8: https://github.com/fommil/lions-share/issues/7");
-
         String filename = args[0];
         File outFile = new File(filename);
         if (outFile.delete())
