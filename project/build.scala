@@ -28,7 +28,7 @@ object LionBuild extends FommilBuild with Dependencies {
   )
 
   lazy val analysis = module("analysis") settings (
-    libraryDependencies ++= sprayjson :: commonsMaths :: akka :: logback :: guava :: jsr305 :: scalatest :: Nil)
+    libraryDependencies ++= sprayjson :: parboiled :: commonsMaths :: akka :: logback :: guava :: jsr305 :: scalatest :: Nil)
 
   lazy val sbt = module("sbt") dependsOn (analysis) settings (
     sbtPlugin := true)
@@ -44,23 +44,24 @@ trait Dependencies {
     ExclusionRule(organization = "org.slf4j")
   )
 
-  val lombok = "org.projectlombok" % "lombok" % "1.12.6" % "provided"
+  val lombok = "org.projectlombok" % "lombok" % "1.16.2" % "provided"
 //  val allocInstrument = "com.google.code.java-allocation-instrumenter" % "java-allocation-instrumenter" % "2.1"
   val allocInstrument = "com.github.fommil" % "java-allocation-instrumenter" % "2.2-SNAPSHOT"
-  val guava = "com.google.guava" % "guava" % "17.0-rc2"
+  val guava = "com.google.guava" % "guava" % "18.0"
   // guava doesn't declare jsr305
   val jsr305 = "com.google.code.findbugs" % "jsr305" % "2.0.3"
 
-  val scalatest = "org.scalatest" %% "scalatest" % "2.1.3" % "test"
+  val scalatest = "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 // needed when we got to scala 2.11
 //  val scalaxml = "org.scala-lang.modules" %% "scala-xml" % "1.0.1"
 
-  val sprayjson = "io.spray" %% "spray-json" % "1.2.6"
-  val akka = "com.typesafe.akka" %% "akka-slf4j" % "2.3.0" excludeAll (bad: _*)
+  val sprayjson = "io.spray" %% "spray-json" % "1.3.1"
+  val parboiled = "org.parboiled" %% "parboiled-scala" % "1.1.7"
+  val akka = "com.typesafe.akka" %% "akka-slf4j" % "2.3.9" excludeAll (bad: _*)
 
   val logback = "ch.qos.logback" % "logback-classic" % "1.1.2"
 
-  val commonsMaths = "org.apache.commons" % "commons-math3" % "3.2"
+  val commonsMaths = "org.apache.commons" % "commons-math3" % "3.4.1"
 }
 
 trait FommilBuild extends Build {
