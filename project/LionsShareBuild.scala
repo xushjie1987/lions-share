@@ -72,7 +72,7 @@ object LionBuild extends Build {
     scalaVersion := "2.10.4",
     organization := "com.github.fommil.lion",
     // when bumping the version, also update in LionPlugin.scala
-    version := "1.0.0",
+    version := "1.0.1-SNAPSHOT",
     // scoverage highlighting fixed in scala 2.11
     ScoverageKeys.coverageHighlighting := false,
     javacOptions in (Compile, compile) ++= Seq (
