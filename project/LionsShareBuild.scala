@@ -5,7 +5,10 @@ import sbtassembly.AssemblyPlugin._
 import sbtassembly.AssemblyKeys.assembly
 import com.typesafe.sbt.SbtScalariform._
 import scoverage.ScoverageSbtPlugin._
-import sbtrelease.ReleasePlugin._
+//import sbtrelease.ReleasePlugin._
+//import ReleaseKeys._
+//import com.typesafe.sbt.pgp.PgpKeys
+//import PgpKeys._
 
 object LionBuild extends Build {
   def module(dir: String, settings: Seq[Setting[_]] = commonSettings) =
@@ -52,10 +55,11 @@ object LionBuild extends Build {
     agent, analysis, sbt
   ) dependsOn (sbt)
 
-  lazy val commonSettings = scalariformSettings ++ Seq(
+  lazy val commonSettings = scalariformSettings ++ /*releaseSettings ++*/ Seq(
     // must use same version of scala as SBT
     scalaVersion := "2.10.4",
     organization := "com.github.fommil.lion",
+    version := "1.0.0-SNAPSHOT",
     // scoverage highlighting fixed in scala 2.11
     ScoverageKeys.coverageHighlighting := false,
     javacOptions in (Compile, compile) ++= Seq (
@@ -79,6 +83,7 @@ object LionBuild extends Build {
     publishMavenStyle := true,
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => false },
+    //publishArtifactsAction := PgpKeys.publishSigned.value,
     credentials += Credentials(
       "Sonatype Nexus Repository Manager", "oss.sonatype.org",
       sys.env.get("SONATYPE_USERNAME").getOrElse(""),
