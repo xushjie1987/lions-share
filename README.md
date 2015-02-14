@@ -23,9 +23,7 @@ This project is twinned with [Shelmet](https://github.com/rorygraves/shelmet) fo
 To use the plugin, add the following to your project's `project/plugins.sbt` file:
 
 ```scala
-resolvers += Resolver.sonatypeRepo("snapshots")
-
-addSbtPlugin("com.github.fommil.lion" % "sbt" % "1.0-SNAPSHOT")
+addSbtPlugin("com.github.fommil.lion" % "sbt" % "1.0.0")
 ```
 
 Then you may run `sbt lion` to get a report using the default settings on your
