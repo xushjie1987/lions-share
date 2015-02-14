@@ -47,7 +47,7 @@ trait Dependencies {
   )
 
   val lombok = "org.projectlombok" % "lombok" % "1.16.2" % "provided"
-  val allocInstrument = "com.github.fommil" % "java-allocation-instrumenter" % "2.2-SNAPSHOT"
+  val allocInstrument = "com.github.fommil" % "java-allocation-instrumenter" % "3.0"
   val guava = "com.google.guava" % "guava" % "18.0"
   // guava doesn't declare jsr305
   val jsr305 = "com.google.code.findbugs" % "jsr305" % "2.0.3"
@@ -94,12 +94,12 @@ trait FommilBuild extends Build {
     outputStrategy := Some(StdoutOutput),
     fork := true,
     maxErrors := 1,
-    resolvers ++= Seq(
-      Resolver.mavenLocal,
-      Resolver.typesafeRepo("releases"),
-      Resolver.sonatypeRepo("snapshots")
+//    resolvers ++= Seq(
+//      Resolver.mavenLocal,
+//      Resolver.typesafeRepo("releases"),
+//      Resolver.sonatypeRepo("snapshots")
 //      "spray" at "http://repo.spray.io/"
-    ),
+//    ),
     scalaVersion := projectScala,
     licenses := Seq("LGPL" -> url("https://www.gnu.org/licenses/lgpl.html")),
     homepage := Some(url("http://github.com/fommil/lions-share")),
