@@ -22,7 +22,7 @@ object LionPlugin extends Plugin with StringGzResourceSupport with StringResourc
   val lionAllocTrace = SettingKey[Map[String, Long]]("classes and byte sample threshold")
 
   // https://github.com/sbt/sbt/issues/1260
-  private val agent = "com.github.fommil.lion" % "agent" % "1.0-SNAPSHOT" classifier ("assembly") intransitive ()
+  private val agent = "com.github.fommil.lion" % "agent" % "1.0.0" classifier ("assembly") intransitive ()
 
   override val projectSettings = Seq(
     libraryDependencies += agent,

@@ -2,6 +2,10 @@ scalaVersion := "2.10.4"
 
 javaOptions := Seq("-XX:+UseConcMarkSweepGC")
 
+resolvers += Resolver.sonatypeRepo("snapshots")
+
+resolvers += Resolver.sonatypeRepo("staging")
+
 // number of times to repeat the un-instrumented runs 
 lionRuns := 5
 

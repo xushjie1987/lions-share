@@ -22,11 +22,21 @@ object LionBuild extends Build {
       "com.github.fommil" % "java-allocation-instrumenter" % "3.0"
     ),
     packageOptions := Seq(ManifestAttributes(
-      "Premain-Class" -> "com.github.fommil.lion.agent.AllocationAgent",
-      "Boot-Class-Path" -> "agent-assembly.jar",
-      "Can-Redefine-Classes" -> "true",
-      "Can-Retransform-Classes" -> "true",
-      "Main-Class" -> "NotSuitableAsMain"
+        "Premain-Class" -> "com.github.fommil.lion.agent.AllocationAgent",
+        /*
+         Boot-Class-Path must match the exact filename of the agent
+         artefact. When doing a publishLocal, this is agent-assembly,
+         when downloaded from Nexus, this is
+         agent-{version}-assembly.jar. This logic sort-of catches this
+         (but won't work if you do a publishLocal of a non-snapshot
+         release). Presumably, this is a difference between ivy and
+         maven style publishing.
+         */
+        "Boot-Class-Path" -> {if (version.value.contains("SNAP")) "agent-assembly.jar"
+                             else s"agent-${version.value}-assembly.jar"},
+        "Can-Redefine-Classes" -> "true",
+        "Can-Retransform-Classes" -> "true",
+        "Main-Class" -> "NotSuitableAsMain"
     )),
     artifact in (Compile, assembly) ~= { art =>
       art.copy(`classifier` = Some("assembly"))
@@ -53,13 +63,16 @@ object LionBuild extends Build {
   // would be nice not to have to define the 'root'
   lazy val root = Project(id = "parent", base = file("."), settings = commonSettings) aggregate (
     agent, analysis, sbt
-  ) dependsOn (sbt)
+  ) dependsOn (sbt) settings (
+    publishArtifact := false
+  )
 
   lazy val commonSettings = scalariformSettings ++ /*releaseSettings ++*/ Seq(
     // must use same version of scala as SBT
     scalaVersion := "2.10.4",
     organization := "com.github.fommil.lion",
-    version := "1.0.0-SNAPSHOT",
+    // when bumping the version, also update in LionPlugin.scala
+    version := "1.0.0",
     // scoverage highlighting fixed in scala 2.11
     ScoverageKeys.coverageHighlighting := false,
     javacOptions in (Compile, compile) ++= Seq (
@@ -91,8 +104,8 @@ object LionBuild extends Build {
     ),
     publishTo <<= version { v: String =>
          val nexus = "https://oss.sonatype.org/"
-         if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
-         else                             Some("releases" at nexus + "service/local/staging/deploy/maven2")
+         if (v.contains("SNAP")) Some("snapshots" at nexus + "content/repositories/snapshots")
+         else                    Some("releases" at nexus + "service/local/staging/deploy/maven2")
     },
     pomExtra := (
      <scm>
