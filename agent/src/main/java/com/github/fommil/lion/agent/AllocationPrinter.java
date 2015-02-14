@@ -1,6 +1,5 @@
 package com.github.fommil.lion.agent;
 
-import com.google.common.io.Closeables;
 import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
 import lombok.RequiredArgsConstructor;
 
@@ -44,7 +43,7 @@ public class AllocationPrinter implements Runnable {
                     writer.flush();
                 } finally {
                     from = to;
-                    Closeables.close(writer, true);
+                    writer.close();
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);

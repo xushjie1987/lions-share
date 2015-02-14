@@ -1,17 +1,17 @@
 package com.github.fommil.lion.agent;
 
-import com.google.common.collect.Maps;
 import com.google.monitoring.runtime.instrumentation.AllocationInstrumenter;
 import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
 
 import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.github.fommil.lion.agent.Preconditions.checkArgument;
 import static java.lang.System.out;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -40,7 +40,7 @@ public class AllocationAgent {
         out.println("[AGENT] Writing allocation data to " + outFile.getAbsolutePath());
         out.println("[AGENT] Taking snapshots every " + period + " seconds");
 
-        Map<String, Long> rates = Maps.newHashMap();
+        Map<String, Long> rates = new HashMap<String, Long>();
         if (args.length > 2)
             for (String arg : args[2].split(",")) {
                 String[] parts = arg.split(":");

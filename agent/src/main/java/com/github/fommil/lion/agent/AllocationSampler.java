@@ -1,18 +1,19 @@
 package com.github.fommil.lion.agent;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Queues;
-import com.google.common.util.concurrent.AtomicLongMap;
+import com.github.fommil.lion.agent.AtomicLongMap;
 import com.google.monitoring.runtime.instrumentation.Sampler;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.github.fommil.lion.agent.Preconditions.checkNotNull;
 
 public class AllocationSampler implements Sampler {
 
@@ -20,8 +21,10 @@ public class AllocationSampler implements Sampler {
     private final AtomicLongMap<String> totalBytes = AtomicLongMap.create();
 
     private final AtomicLongMap<String> lastSampledSize = AtomicLongMap.create();
-    private final Map<String, ConcurrentLinkedQueue<StackTraceElement[]>> traces = Maps.newConcurrentMap();
-    private final Map<String, AtomicLongMap<Integer>> arrayLengths = Maps.newConcurrentMap();
+    private final Map<String, ConcurrentLinkedQueue<StackTraceElement[]>> traces =
+        new ConcurrentHashMap<String, ConcurrentLinkedQueue<StackTraceElement[]>>();
+    private final Map<String, AtomicLongMap<Integer>> arrayLengths =
+        new ConcurrentHashMap<String, AtomicLongMap<Integer>>();
 
     public AllocationSampler(Map<String, Long> trackSources,
                              Set<String> trackLengths) {
@@ -30,7 +33,8 @@ public class AllocationSampler implements Sampler {
 
         this.trackSources = trackSources;
         for (Map.Entry<String, Long> track : trackSources.entrySet())
-            traces.put(track.getKey(), Queues.<StackTraceElement[]>newConcurrentLinkedQueue());
+            traces.put(track.getKey(),
+                       new ConcurrentLinkedQueue<StackTraceElement[]>());
         for (String name : trackLengths)
             arrayLengths.put(name, AtomicLongMap.<Integer>create());
     }
@@ -73,26 +77,34 @@ public class AllocationSampler implements Sampler {
     ////////////////////////////////////////////////////////
 
     public Map<String, Long> snapshotTotalBytes() {
-        return Maps.newHashMap(totalBytes.asMap());
+        return snap(totalBytes);
     }
 
     public Map<String, List<StackTraceElement[]>> snapshotTraces() {
-        Map<String, List<StackTraceElement[]>> snapshot = Maps.newHashMap();
+        Map<String, List<StackTraceElement[]>> snapshot = new HashMap<String, List<StackTraceElement[]>>();
         for (Map.Entry<String, ConcurrentLinkedQueue<StackTraceElement[]>> entry : traces.entrySet()) {
             if (entry.getValue().isEmpty()) continue;
-            List<StackTraceElement[]> samples = Lists.newArrayList(entry.getValue());
+            List<StackTraceElement[]> samples = new ArrayList<StackTraceElement[]>(entry.getValue());
             snapshot.put(entry.getKey(), samples);
         }
         return snapshot;
     }
 
     public Map<String, Map<Integer, Long>> snapshotArrayLengths() {
-        Map<String, Map<Integer, Long>> snapshot = Maps.newHashMap();
+        Map<String, Map<Integer, Long>> snapshot = new HashMap<String, Map<Integer, Long>>();
         for (Map.Entry<String, AtomicLongMap<Integer>> entry : arrayLengths.entrySet()) {
             if (entry.getValue().isEmpty()) continue;
-            Map<Integer, Long> lengths = Maps.newHashMap(entry.getValue().asMap());
+            Map<Integer, Long> lengths = snap(entry.getValue());
             snapshot.put(entry.getKey(), lengths);
         }
         return snapshot;
+    }
+
+    private <T> Map<T, Long> snap(AtomicLongMap<T> atomic) {
+        Map<T, Long> builder = new HashMap<T, Long>();
+        for (Map.Entry<T, AtomicLong> e: atomic.underlying().entrySet()) {
+            builder.put(e.getKey(), e.getValue().get());
+        }
+        return builder;
     }
 }

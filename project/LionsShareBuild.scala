@@ -16,10 +16,7 @@ object LionBuild extends Build {
     autoScalaLibrary := false, crossPaths := false,
     libraryDependencies ++= Seq(
       "org.projectlombok" % "lombok" % "1.16.2" % "provided",
-      "com.github.fommil" % "java-allocation-instrumenter" % "3.0",
-      // guava dependency is a pain
-      "com.google.guava" % "guava" % "18.0",
-      "com.google.code.findbugs" % "jsr305" % "2.0.3"
+      "com.github.fommil" % "java-allocation-instrumenter" % "3.0"
     ),
     packageOptions := Seq(ManifestAttributes(
       "Premain-Class" -> "com.github.fommil.lion.agent.AllocationAgent",
