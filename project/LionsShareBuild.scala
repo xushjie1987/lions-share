@@ -46,7 +46,7 @@ object LionBuild extends Build {
   lazy val analysis = module("analysis") settings (
     libraryDependencies ++= Seq(
       "com.google.guava" % "guava" % "18.0",
-      "com.google.code.findbugs" % "jsr305" % "2.0.3",
+      "com.google.code.findbugs" % "jsr305" % "3.0.0",
       "io.spray" %% "spray-json" % "1.3.1",
       "org.parboiled" %% "parboiled-scala" % "1.1.7",
       "com.typesafe.akka" %% "akka-slf4j" % "2.3.9" excludeAll (bad: _*),
