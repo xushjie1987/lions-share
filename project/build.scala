@@ -108,6 +108,11 @@ trait FommilBuild extends Build {
     publishMavenStyle := true,
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => false },
+    credentials += Credentials(
+      "Sonatype Nexus Repository Manager", "oss.sonatype.org",
+      sys.env.get("SONATYPE_USERNAME").getOrElse(""),
+      sys.env.get("SONATYPE_PASSWORD").getOrElse("")
+    ),
     publishTo <<= version { v: String =>
          val nexus = "https://oss.sonatype.org/"
          if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
