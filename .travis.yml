@@ -16,6 +16,5 @@ env:
   global:
     # travis encrypt -r fommil/lions-share SONATYPE_USERNAME=<USERNAME>
     # travis encrypt -r fommil/lions-share SONATYPE_PASSWORD=<PASSWORD>
-  - secure: "gDgzmymkTWqhki+vw1qk2dChwflw7ctumwj8LO66DiGLq2I7x+VLwe4ZszA9gezPLZsV8pMVt4gBqoFXi+i2tlU8yQhQqKRUqfn6QWrk/SerNJsJ7RxnFM4WSQ/tr6Evgad1icCUkQi0nDr7OwvzjRJjPfY5IrAHNCmthe3OAlc="
-  - secure: "JTMpiwwfNhGEc0iIFVR+jJq1Hwzti2buW+B6fCYWt7tJboVQTGV5k+IFtHzNeyTGppRu6eOhZ3Z7EWZWz7JNqMAwsJ1wJc49W+BcjulGAcYSagqO78UBt32YAzqVKU0hQST/LEyrlL1HkNF2AWhjQDhLW8cF0eVJizOEf2UZddU="
-  - secure: "qbHKNLBxP7uc1ivq0zJgzWs3m9+ssoshe5YjCWY3Nue/YCLuJLGbHSEzmnYUgzf4XL2Y6nObRXplOaREHrL4XJCSDZ0oouNFjt94Ii9tKq/J0d3Vg3d83T4ILc2wPtfSvgxmYvovRA/nVOUGVpCPyTx6MMjtEg8ObkB8CrnScqo="
+  - secure: "HxD4wAObzW162UyawGcyioFHlR3TJc7a7I1IuAPtTMqCBXvACMsqUgw5Cs98T7DdI+kXCUZrY6EQVOmFj7p+og/EETHQ8KyTP4vq30U8tEtIXJcunVQlvNVOv2y41cBsqmTBQH58YMVapmFhP6GUTsoFuXyiwE5ySoz2iaBSjsM="
+  - secure: "gdqEJybSA1VRxcVYfKeIikdF0zf7NcD4uWkpMpiLbQ8z0SvtJZ7wQqkt26NCkzTTw7NmzT6GJOPC0wyqJwUIWunO+Sr5K4ZE8lD0qfIb1PtT24gMOu8ecmvAzKaT3AirF4zHzFrdSuMx8uhGZE+UqctrzS0LGy6mzKHioPluKis="
