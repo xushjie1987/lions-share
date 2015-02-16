@@ -25,6 +25,7 @@ object GcParser {
  * 1. 1.6.0_25
  * 2. 1.7.0_51
  * 3. 1.8.0_0
+ * 4. 1.8.0_31
  *
  * The following garbage collectors are supported:
  *
@@ -50,11 +51,15 @@ private class GcParser extends GcParserCommon with GcParserDefault with GcParser
     val parse = ReportingParseRunner((DefaultGc | CmsGc | Header) ~ EOI).run(atom)
     parse.result match {
       case None =>
-        log.info("Could not parse this part of the log. " +
+        log.info(("=" * 50) + "\n" +
+          "Could not parse this part of the log. " +
           "Please report this message (or the log), noting your version of Java, to " +
           "https://github.com/fommil/lions-share/issues\n" +
           "or, even better, add a test case to the GcParserTest\n" +
-          ErrorUtils.printParseErrors(parse) + atom)
+          ("-" * 50) + "\n" +
+          ErrorUtils.printParseErrors(parse) + "\n" +
+          ("-" * 50) + "\n" + atom + "\n" +
+          ("=" * 50) + "\n")
         Nil
 
       case Some(result) => result
@@ -77,8 +82,13 @@ trait GcParserCommon extends WhitespaceAwareParser {
   def Header: Rule1[GcEvents] = rule {
     "Java HotSpot(TM) " ~ oneOrMore(noneOf("\n")) ~ "\n" ~
       "Memory: " ~ oneOrMore(noneOf("\n")) ~ "\n" ~
-      "CommandLine flags: " ~ oneOrMore(noneOf("\n"))
+      "CommandLine flags: " ~ oneOrMore(noneOf("\n")) ~ " "
   } ~> { s => Nil }
+
+  // no timestamp: can't do anything
+  def GcHeap: Rule1[List[GcEvent]] = rule {
+    "Heap " ~ nTimesMap(3, MemoryRegionSnapshot)
+  } ~~> { snaps => Nil }
 
   def SurvivorSummary: Rule1[Int] = rule {
     "Desired survivor size " ~ Digits ~ " bytes, new threshold " ~ SavedDigits ~ " (max " ~ Digits ~ ")\n"
@@ -115,7 +125,8 @@ trait GcParserCommon extends WhitespaceAwareParser {
 
   def MemoryRegionName: Rule1[String] = rule {
     "PSYoungGen" | "PSOldGen" | "PSPermGen" | "ParOldGen" |
-      "concurrent mark-sweep generation" | "par new generation" | "concurrent-mark-sweep perm gen" | "ParNew"
+      "concurrent mark-sweep generation" | "par new generation" | "concurrent-mark-sweep perm gen" | "ParNew" |
+      "Metaspace"
   } ~> identity
 
   def Times: Rule0 = rule {
@@ -156,7 +167,7 @@ trait GcParserDefault {
   this: GcParserCommon =>
 
   def DefaultGc: Rule1[List[GcEvent]] = rule {
-    NormalDefaultGc | FinalDefaultGc | DefaultGcHeap
+    NormalDefaultGc | FinalDefaultGc | GcHeap
   }
 
   def NormalDefaultGc: Rule1[List[GcEvent]] = rule {
@@ -192,17 +203,16 @@ trait GcParserDefault {
     }
   }
 
-  // no timestamp: can't do anything
-  def DefaultGcHeap: Rule1[List[GcEvent]] = rule {
-    "Heap " ~ nTimesMap(3, MemoryRegionSnapshot)
-  } ~~> { snaps => Nil }
-
   def CollectionSummary: Rule1[(Boolean, Option[Int], List[String], Duration)] = rule {
-    "[ " ~ FullGc ~ " " ~ optional("(Allocation Failure) ") ~
+    "[ " ~ FullGc ~ " " ~
+      optional("(Metadata GC Threshold) ") ~
+      optional("(Allocation Failure) ") ~
       optional(SurvivorSummary) ~
       oneOrMore(CollectionRegionSummary) ~
       CollectionSizes ~
-      optional(CollectionRegionSummary) ~ ", " ~ SavedSeconds ~
+      optional(", ") ~
+      optional(CollectionRegionSummary) ~
+      optional(", ") ~ SavedSeconds ~
       " secs] " ~ optional(Times)
   } ~~> { (full, survivors, regions, permGen, duration) =>
     (full, survivors, regions ++ permGen, duration)
@@ -217,6 +227,13 @@ trait GcParserDefault {
 
 trait GcParserCms {
   this: GcParserCommon =>
+
+  override def Header: Rule1[GcEvents] = rule {
+    "Java HotSpot(TM) " ~ oneOrMore(noneOf("\n")) ~ "\n" ~
+      "Memory: " ~ oneOrMore(noneOf("\n")) ~ "\n" ~
+      "CommandLine flags: " ~ oneOrMore(noneOf("\n")) ~ " " ~
+      optional(ConcurrentMarks) ~ optional(GcHeap)
+  } ~~> { (marks, heap) => marks.toIterable.flatten ++: heap.toIterable.flatten.toList }
 
   def CmsGc: Rule1[List[GcEvent]] = rule {
     ConcurrentSweep | ConcurrentMarks | ConcurrentSweepSnapshot
